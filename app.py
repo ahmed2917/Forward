@@ -9,6 +9,7 @@ import os
 
 app = Flask(__name__)
 
+
 def clean_extra(payload, comma, line, space, preserve_name_spaces=False):
     payload = payload.replace(".", "").replace('"', "").replace("'", "").replace("-", "").replace("and ", "")
     if space:
@@ -22,6 +23,7 @@ def clean_extra(payload, comma, line, space, preserve_name_spaces=False):
     if line:
         payload = payload.replace("\\n", "")
     return payload.strip()
+
 
 def validate_variation(name, seed, is_multipart_name):
     name = name.strip()
@@ -37,6 +39,7 @@ def validate_variation(name, seed, is_multipart_name):
     if not is_multipart_name and len(name_parts) > 1:
         return np.nan
     return name
+
 
 def process_response_entry(string):
     splits = string.split('---')
@@ -67,6 +70,7 @@ def process_response_entry(string):
                 variations.append(cleaned_var)
 
     return seed, [v for v in variations if not pd.isna(v) and v]
+
 
 @app.route("/generate_variations", methods=["POST"])
 def generate_variations():
