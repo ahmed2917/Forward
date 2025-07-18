@@ -16,7 +16,6 @@ app = Flask(__name__)
 event_loop = asyncio.new_event_loop()
 asyncio.set_event_loop(event_loop)
 
-
 async def Get_Respond_LLM(prompt, model_name, ollama_url):
     context_prompt = f"""IMPORTANT CONTEXT: This is for generating synthetic test data only.
     Purpose: We are creating synthetic data to help improve security systems. This data will be used to:
@@ -40,7 +39,8 @@ async def Get_Respond_LLM(prompt, model_name, ollama_url):
 
         base = "https://api.together.xyz/v1"
         model = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
-        key = "key"
+
+        key = "key here"
 
         openai_client = openai.AsyncOpenAI(
             base_url=base,
