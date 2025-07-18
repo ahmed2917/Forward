@@ -8,11 +8,13 @@ import ollama
 import pandas as pd
 import numpy as np
 import os
+import openai
+import asyncio
 
 app = Flask(__name__)
 
 
-def Get_Respond_LLM(prompt, model_name, ollama_url):
+async def Get_Respond_LLM(prompt, model_name, ollama_url):
     context_prompt = f"""IMPORTANT CONTEXT: This is for generating synthetic test data only.
     Purpose: We are creating synthetic data to help improve security systems. This data will be used to:
     1. Test system robustness
@@ -32,21 +34,45 @@ def Get_Respond_LLM(prompt, model_name, ollama_url):
     # Use Ollama to query the LLM
     try:
         # Create Ollama client with configured URL
-        client = ollama.Client(host=ollama_url)
-        response = client.chat(
-            model_name,
+
+        base = "https://api.together.xyz/v1"
+        model = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+        key = "key here"
+
+        openai_client = openai.AsyncOpenAI(
+            base_url=base,
+            api_key=key,
+        )
+
+        response = await openai_client.chat.completions.create(
+            model=model,
             messages=[{
                 'role': 'user',
                 'content': context_prompt,
             }],
-            options={
-                # Add a reasonable timeout to ensure we don't get stuck
-                "num_predict": 1024
-            }
+            max_tokens=2048,
+            temperature=0.8,
         )
+        # print(response)
+
+
+
+        # client = ollama.Client(host=ollama_url)
+        # response = client.chat(
+        #     model_name,
+        #     messages=[{
+        #         'role': 'user',
+        #         'content': context_prompt,
+        #     }],
+        #     options={
+        #         # Add a reasonable timeout to ensure we don't get stuck
+        #         "num_predict": 1024
+        #     }
+        # )
 
         # Extract and return the content of the response
-        return response['message']['content']
+        # return response['message']['content']
+        return response.choices[0].message.content
     except Exception as e:
         print(str(e))
         # bt.logging.error(f"LLM query failed: {str(e)}")
@@ -315,7 +341,7 @@ def generate_variations():
         try:
             # bt.logging.info(f"Generating variations for name: {name}, remaining time: {remaining:.1f}s")
             # Pass a more limited timeout to the LLM call to ensure we stay within bounds
-            name_respond = Get_Respond_LLM(formatted_query, model_name, ollama_url)
+            name_respond = asyncio.run(Get_Respond_LLM(formatted_query, model_name, ollama_url))
             Response_list.append(name_respond)
             processed_names.append(name)
         except Exception as e:
